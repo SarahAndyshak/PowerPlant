@@ -1,35 +1,70 @@
-import 'bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './css/styles.css';
-import Triangle from './js/triangle.js';
-import Rectangle from './js/rectangle.js';
+//Business Logic
 
-function handleTriangleForm(event) {
-  event.preventDefault();
-  document.querySelector('#response').innerText = null;
-  const length1 = parseInt(document.querySelector('#length1').value);
-  const length2 = parseInt(document.querySelector('#length2').value);
-  const length3 = parseInt(document.querySelector('#length3').value);
-  const triangle = new Triangle(length1, length2, length3);
-  const response = triangle.checkType();
-  const pTag = document.createElement("p");
-  pTag.append(`Your result is: ${response}.`);
-  document.querySelector('#response').append(pTag);
-}
+const storeState = (initialState) => {
+  let currentState = initialState;
+  return (stateChangeFunction = (state) => state) => {
+    const newState = stateChangeFunction(currentState);
+    currentState = { ...newState };
+    return newState;
+  };
+};
 
-function handleRectangleForm(event) {
-  event.preventDefault();
-  document.querySelector('#response2').innerText = null;
-  const length1 = parseInt(document.querySelector('#rect-length1').value);
-  const length2 = parseInt(document.querySelector('#rect-length2').value);
-  const rectangle = new Rectangle(length1, length2);
-  const response = rectangle.getArea();
-  const pTag = document.createElement("p");
-  pTag.append(`The area of the rectangle is ${response}.`);
-  document.querySelector('#response2').append(pTag);
-}
+const stateControl = storeState({});
 
-window.addEventListener("load", function() {
-  document.querySelector("#triangle-checker-form").addEventListener("submit", handleTriangleForm);
-  document.querySelector("#rectangle-area-form").addEventListener("submit", handleRectangleForm);
+const changeState = (prop) => {
+  return (value) => {
+    return (state) => ({
+      ...state,
+      [prop]: (state[prop] || 0) + value,
+    });
+  };
+};
+
+const plant0 = storeState({ soil: 0, water: 0, light: 0 });
+
+// const feed = changeState("soil")(1);
+const blueFood = changeState("soil")(5);
+
+// const hydrate = changeState("water")(1);
+// const superWater = changeState("water")(5);
+
+// const sunshine = changeState("light")(111);
+// const plantLamp = changeState("light")(5);
+
+//UI LOGIC
+window.onload = function () {
+  document.getElementById("feed").onclick = function () {
+    const newState = stateControl(blueFood);
+    document.getElementById("soil-value").innerText = `Soil: ${newState.soil}`;
+  };
+
+  //when the above is called it needs a slice of state : const newState = stateControl(blueFood({}));
+
+  document.getElementById("feedPlant0").onclick = function () {
+    const plant0Feed = plant0(blueFood);
+    document.getElementById(
+      "soil1-value"
+    ).innerText = `Soil Plant Zero: ${plant0Feed.soil}`;
+  };
+
+  document.getElementById("show-state").onclick = function () {
+    const currentState = stateControl();
+    document.getElementById(
+      "soil-value"
+    ).innerText = `Soil: ${currentState.soil}`;
+  };
+
+  document.getElementById("show-state").onclick = function () {
+    const currentState = { ...stateControl("soil")(4) };
+    document.getElementById(
+      "soil1-value"
+    ).innerText = `Soil: ${currentState.soil}`;
+  };
+};
+
+window.addEventListener("load", function () {
+  document
+    .querySelector("form")
+    .addEventListener("submit");
+  stateControl();
 });
